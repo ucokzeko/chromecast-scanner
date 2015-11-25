@@ -3,7 +3,7 @@ var find = require('array-find');
 var xtend = require('xtend');
 
 var defaults = {
-  ttl: 5000,
+  ttl: 10000,
   service_name: '_googlecast._tcp.local',
   service_type: 'PTR',
   mdns: {}
