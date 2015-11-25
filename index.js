@@ -3,13 +3,15 @@ var find = require('array-find');
 var xtend = require('xtend');
 
 var defaults = {
-  ttl: 10000,
+  ttl: 5000,
   service_name: '_googlecast._tcp.local',
   service_type: 'PTR',
   mdns: {}
 };
 
 module.exports = function(opts, cb) {
+  var list = []
+
   if (typeof opts === 'function') {
     cb = opts;
     opts = defaults;
@@ -21,7 +23,7 @@ module.exports = function(opts, cb) {
 
   var timer = setTimeout(function() {
     close();
-    cb(new Error('device not found'));
+    cb(list);
   }, opts.ttl);
 
   var onResponse = function(response) {
@@ -40,9 +42,10 @@ module.exports = function(opts, cb) {
     if (!info || (opts.name && info.name !== opts.name)) {
       return;
     }
-
-    cb(null, info, response);
-    close();
+    
+    if (!contains(list, info)) {
+      list.push(info); 
+    }
   };
 
   m.on('response', onResponse);
@@ -62,3 +65,12 @@ module.exports = function(opts, cb) {
 
   return close;
 };
+
+var contains = function(list, obj) {
+  var result = false;
+  list.forEach(function(item) {
+    if (item.name === obj.name)
+      result = true;
+  });
+  return result;
+}
