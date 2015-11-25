@@ -9,7 +9,7 @@ var defaults = {
   mdns: {}
 };
 
-module.exports = function(opts, cb) {
+module.exports = function(opts, count) {
   var list = []
 
   if (typeof opts === 'function') {
@@ -42,9 +42,14 @@ module.exports = function(opts, cb) {
     if (!info || (opts.name && info.name !== opts.name)) {
       return;
     }
-    
+
     if (!contains(list, info)) {
-      list.push(info); 
+      list.push(info);
+    }
+
+    if (list.length >= count) {
+      close();
+      cb(list);
     }
   };
 
