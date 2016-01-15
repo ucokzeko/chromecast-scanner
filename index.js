@@ -23,7 +23,7 @@ module.exports = function(opts, count) {
 
   var timer = setTimeout(function() {
     close();
-    cb(list);
+    cb(null, list);
   }, opts.ttl);
 
   var onResponse = function(response) {
@@ -49,8 +49,8 @@ module.exports = function(opts, count) {
 
     if (list.length >= count) {
       close();
-      cb(list);
-    }
+      cb(null, list);
+    } 
   };
 
   m.on('response', onResponse);
