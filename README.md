@@ -1,22 +1,15 @@
 # chromecast-scanner
 
-scan your local network for chromecast devices and return the
-first found.
+Scan your local network for Chromecast devices.
 
-### Usage
-```javascript
-var scanner = require('chromecast-scanner');
+## Installation
 
-scanner(function(err, service) {
-  console.log('chromecast %s running on: %s',
-    service.name,
-    service.data);
-});
+Install the package with NPM:
+
+```bash
+$ npm install ucokzeko/chromecast-scanner
 ```
 
-### Installation
+## Usage
 
-`npm install chromecast-scanner`
-
-## License
-MIT
+More details coming soon.

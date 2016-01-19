@@ -1,8 +1,8 @@
-var mdns = require('multicast-dns');
-var find = require('array-find');
-var xtend = require('xtend');
+"use strict";
 
-var defaults = {
+const mdns = require('multicast-dns');
+
+let defaults = {
   ttl: 10000,
   service_name: '_googlecast._tcp.local',
   service_type: 'PTR',
@@ -10,73 +10,56 @@ var defaults = {
   count: 10
 };
 
-module.exports = function(opts, cb) {
-  var list = [];
+module.exports = (opts, cb) => {
+  let devices = [];
 
   if (typeof opts === 'function') {
     cb = opts;
-    opts = defaults;
-  } else {
-    opts = xtend(defaults, opts);
+    opts = {};
   }
 
-  var m = mdns(opts.mdns);
+  opts = Object.assign({}, defaults, opts);
 
-  var timer = setTimeout(function() {
+  let timer = setTimeout(() => {
     close();
-    cb(null, list);
+    cb(null, devices);
   }, opts.ttl);
 
-  var onResponse = function(response) {
-    var answer = response.answers[0];
-
-    if (answer &&
-        (answer.name !== opts.service_name ||
-         answer.type !== opts.service_type)) {
-      return;
-    }
-
-    var info = find(response.additionals, function(entry) {
-      return entry.type === 'A';
-    });
-
-    if (!info || (opts.name && info.name !== opts.name)) {
-      return;
-    }
-
-    if (!contains(list, info)) {
-      list.push(info);
-    }
-
-    if (list.length >= opts.count) {
-      close();
-      cb(null, list);
-    }
-  };
-
+  let m = mdns(opts.mdns);
   m.on('response', onResponse);
-
   m.query({
-    questions:[{
+    questions: [{
       name: opts.service_name,
       type: opts.service_type
     }]
   });
 
-  var close = function() {
+  function onResponse(response) {
+    let answer = response.answers[0];
+    if (answer && (answer.name !== opts.service_name || answer.type !== opts.service_type)) {
+      return;
+    }
+
+    let info = response.additionals.find(entry => entry.type === 'A');
+    if (!info || (opts.name && info.name !== opts.name)) {
+      return;
+    }
+
+    if (!devices.some(device => device.name === info.name)) {
+      devices.push(info);
+    }
+
+    if (devices.length >= opts.count) {
+      close();
+      cb(null, devices);
+    }
+  }
+
+  function close() {
     m.removeListener('response', onResponse);
     clearTimeout(timer);
     m.destroy();
-  };
+  }
 
   return close;
 };
-
-var contains = function(list, obj) {
-  var result = false;
-  list.forEach(function(item) {
-    if (item.name === obj.name)
-      result = true;
-  });
-  return result;
-}
