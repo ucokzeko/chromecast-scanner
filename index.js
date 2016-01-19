@@ -6,11 +6,12 @@ var defaults = {
   ttl: 10000,
   service_name: '_googlecast._tcp.local',
   service_type: 'PTR',
-  mdns: {}
+  mdns: {},
+  count: 10
 };
 
-module.exports = function(opts, count) {
-  var list = []
+module.exports = function(opts, cb) {
+  var list = [];
 
   if (typeof opts === 'function') {
     cb = opts;
@@ -47,10 +48,10 @@ module.exports = function(opts, count) {
       list.push(info);
     }
 
-    if (list.length >= count) {
+    if (list.length >= opts.count) {
       close();
       cb(null, list);
-    } 
+    }
   };
 
   m.on('response', onResponse);
