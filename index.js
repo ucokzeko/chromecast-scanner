@@ -1,11 +1,11 @@
 "use strict";
 
-const mdns = require('multicast-dns');
+const mdns = require("multicast-dns");
 
 let defaults = {
-  ttl: 10000,
-  service_name: '_googlecast._tcp.local',
-  service_type: 'PTR',
+  timeout: 10000,
+  serviceName: "_googlecast._tcp.local",
+  serviceType: "PTR",
   mdns: {},
   count: 10
 };
@@ -13,7 +13,7 @@ let defaults = {
 module.exports = (opts, cb) => {
   let devices = [];
 
-  if (typeof opts === 'function') {
+  if (typeof opts === "function") {
     cb = opts;
     opts = {};
   }
@@ -23,24 +23,24 @@ module.exports = (opts, cb) => {
   let timer = setTimeout(() => {
     close();
     cb(null, devices);
-  }, opts.ttl);
+  }, opts.timeout);
 
   let m = mdns(opts.mdns);
-  m.on('response', onResponse);
+  m.on("response", onResponse);
   m.query({
     questions: [{
-      name: opts.service_name,
-      type: opts.service_type
+      name: opts.serviceName,
+      type: opts.serviceType
     }]
   });
 
   function onResponse(response) {
     let answer = response.answers[0];
-    if (answer && (answer.name !== opts.service_name || answer.type !== opts.service_type)) {
+    if (answer && (answer.name !== opts.serviceName || answer.type !== opts.serviceType)) {
       return;
     }
 
-    let info = response.additionals.find(entry => entry.type === 'A');
+    let info = response.additionals.find(entry => entry.type === "A");
     if (!info || (opts.name && info.name !== opts.name)) {
       return;
     }
@@ -56,8 +56,8 @@ module.exports = (opts, cb) => {
   }
 
   function close() {
-    m.removeListener('response', onResponse);
     clearTimeout(timer);
+    m.removeListener("response", onResponse);
     m.destroy();
   }
 
